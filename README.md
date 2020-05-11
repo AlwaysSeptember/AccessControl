@@ -49,16 +49,35 @@ That external system should return one of:
 
 TODO - think about signing requests, to avoid people from being able to probe permissions too easily.
 
-### Requesting access
+### Flow for requesting access
 
-The flow for requesting access should be similar to the following.
 
-When a user requests access, it should be possible for the platform they are on to include in the access request:
+When a user is on a platform, and they attempt to perform an action, and the result of the access control check is 'request_access_url' the following steps should happen.
 
-* access_allowed_url - The url to return the user to if access for that action is allowed.
+
+#### Plaform initiates access request
+
+The platform they are on makes a request to the `request_access_url` and includes the following parameters
+
+* access_allowed_url - The url to return the user to if access for that action is allowed.The access_allowed_url can contain arbitrary parameters. A recommended one would be a token to retrieve details of what the user was trying to do, before the access check was done.
 * access_denied_url - The url to return the user to if access is not allowed.
 
-The access_allowed_url can contain arbitrary parameters. A recommended one would be a token to retrieve details of what the user was trying to do, before the access check was done.
 
-TODO - maybe also 'auto_resubmit' ?
+The access control system must return a unique url, that the platform should redirect the user to.
 
+
+#### Redirect to access control 
+
+The user should be redirected to url returned by the access control system. The access control system can then ask the user to login or otherwise authenticate their identity, or perform whatever other steps are required to decide whether to give that user access or not.
+
+The user should then be redirected to `access_allowed_url` or `access_denied_url` as appropriate.
+
+### After returning to original platform
+
+If they are redirected to the `access_allowed_url` then either manually or automatically the action they were attempting to do can be retried.
+
+If they were redirected to the `access_denied_url` then the action should not be retried either manually or automatically.
+
+TODO - caching for performance reasons....probably only needed for 'readonly' actions e.g. viewing bugs.
+
+TODO - think about error messages. tbh, they are probably more likely to cause drama than to be helpful.
